@@ -62,6 +62,7 @@ countries = alt.topo_feature(data.world_110m.url, 'countries')
 
 graph_data = trafficking.groupby('Alpha-3 code').size().reset_index(name='count')
 graph_data = pd.merge(graph_data, trafficking, how='left', on='Alpha-3 code')
+graph_data = graph_data.drop_duplicates(subset=['Numeric code'])
 plot = alt.Chart(countries).mark_geoshape().encode(
     color='count:Q',
 ).transform_lookup(
@@ -75,3 +76,4 @@ plot = alt.Chart(countries).mark_geoshape().encode(
 )
 
 st.altair_chart(plot, use_container_width=True)
+#End of mapping 
