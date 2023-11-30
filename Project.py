@@ -16,6 +16,7 @@ def readData():
     
 
     return data, coordinates
+
 trafficking, coordinates = readData()
 st.title('Human Trafficking Analysis')
 st.write('This Dashboard is to show the different types of trafficking and show the patterns of what people are being trafficked for in different parts of the world.')
@@ -58,6 +59,7 @@ countries = alt.topo_feature(data.world_110m.url, 'countries')
 #     height=300
 # )
 #Getting data for the points
+
 graph_data = trafficking.groupby('Alpha-3 code').size().reset_index(name='count')
 graph_data = pd.merge(graph_data, trafficking, how='left', on='Alpha-3 code')
 plot = alt.Chart(countries).mark_geoshape().encode(
