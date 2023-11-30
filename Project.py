@@ -8,10 +8,12 @@ from vega_datasets import data
 def readData():
     data = pd.read_csv('Trafficking_Data.csv')
     coordinates = pd.read_csv('countries_codes_and_coordinates.csv')
+    coordinates = coordinates[['Country', 'Alpha-3 code', 'Latitude (average)', 'Longitude (average)']]
+    coordinates['Alpha-3 code'] = coordinates['Alpha-3 code'].str.replace('"','')
+    coordinates['Longitude (average)'] = coordinates['Longitude (average)'].str.replace('"','').astype(float)
+    coordinates['Latitude (average)'] = coordinates['Latitude (average)'].str.replace('"','').astype(float)
     return data, coordinates
 trafficking, coordinates = readData()
-coordinates = coordinates[['Country', 'Alpha-3 code', 'Latitude (average)', 'Longitude (average)']]
-coordinates['Alpha-3 code'] = coordinates['Alpha-3 code'].str.replace('"','')
 st.title('Human Trafficking Analysis')
 st.write('This Dashboard is to show the different types of trafficking and show the patterns of what people are being trafficked for in different parts of the world.')
 st.write(coordinates)
@@ -24,9 +26,9 @@ trafficking['citizenship'] = trafficking['citizenship'].replace(0,"NA")
 trafficking['CountryOfExploitation'] = trafficking['CountryOfExploitation'].replace(0,"NA")
 trafficking['traffickMonths'] = trafficking['traffickMonths'].replace(0,'NA') 
 #merging to get coordinate data for my map with my coordinate data
+coordinates['Alpha-3 code'] = coordinates['Alpha-3 code'].str.strip()
 trafficking['CountryOfExploitation'] = trafficking['CountryOfExploitation'].str.strip()
 trafficking = pd.merge(trafficking, coordinates, how='left', left_on='CountryOfExploitation',right_on='Alpha-3 code')
-st.write(trafficking)
 
 '''
 Graphing Ideas:
@@ -52,4 +54,15 @@ background = alt.Chart(countries).mark_geoshape(
     width=500,
     height=300
 )
-points = alt.Chart(trafficking)
+#Getting data for the points
+graph_data = trafficking.groupby('Alpha-3 code').size().reset_index(name='count')
+graph_data = pd.merge(graph_data, trafficking, how='left', on='Alpha-3 code')
+points = alt.Chart(graph_data).mark_circle(opacity=.5).encode(
+    longitude='Longitude (average)',
+    latitude='Latitude (average)',
+    size='count',
+    tooltip=['Country', 'count']
+
+)
+plot = background + points
+st.altair_chart(plot, use_container_width=True)
