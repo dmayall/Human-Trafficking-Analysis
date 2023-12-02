@@ -47,7 +47,6 @@ _='''
 
 #Starting on making a map
 #_______________________________________________________________
-countries = alt.topo_feature(data.world_110m.url, 'countries')
 #Setting the background of all the countries
 # background = alt.Chart(countries).mark_geoshape(
 #     fill='lightgray',
@@ -59,21 +58,29 @@ countries = alt.topo_feature(data.world_110m.url, 'countries')
 #     height=300
 # )
 #Getting data for the points
+def map(graph_data):
+    countries = alt.topo_feature(data.world_110m.url, 'countries')
+    graph_data = trafficking.groupby('Alpha-3 code').size().reset_index(name='percent')
+    graph_data['percent'] = graph_data['percent']/sum(graph_data['percent'])
+    graph_data = pd.merge(graph_data, trafficking, how='left', on='Alpha-3 code')
+    graph_data = graph_data.drop_duplicates(subset=['Numeric code'])
+    scale_ = alt.Scale(type='band',nice=False, scheme="bluegreen")
+    plot = alt.Chart(countries).mark_geoshape().transform_lookup(
+        lookup='id',
+        from_=alt.LookupData(graph_data, key='Numeric code', fields=['Country', 'percent'])
+    ).project('equirectangular').encode(
+        alt.Color('percent:Q',
+                scale=scale_,
+                legend=alt.Legend(direction="horizontal", orient="bottom", format=".1%")
+        )
+        
+    ).properties(
+        width=500,
+        height=300,
+        title='Denstiy Of Trafficking Destinations'
+    )
 
-graph_data = trafficking.groupby('Alpha-3 code').size().reset_index(name='count')
-graph_data = pd.merge(graph_data, trafficking, how='left', on='Alpha-3 code')
-graph_data = graph_data.drop_duplicates(subset=['Numeric code'])
-plot = alt.Chart(countries).mark_geoshape().encode(
-    color='count:Q',
-).transform_lookup(
-    lookup='id',
-    from_=alt.LookupData(graph_data, key='Numeric code', fields=['Country', 'count'])
-).project('equirectangular')\
-.properties(
-    width=500,
-    height=300,
-    title='Denstiy Of Trafficking Destinations'
-)
+    st.altair_chart(plot, use_container_width=True)
 
-st.altair_chart(plot, use_container_width=True)
+map(trafficking)
 #End of mapping 
