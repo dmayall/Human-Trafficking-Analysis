@@ -1,5 +1,5 @@
+vega_datasets 
 pandas
 altair
-vega_datasets 
 datetime
 streamlit
