@@ -2,7 +2,7 @@ import pandas as pd
 import altair as alt
 import streamlit as st
 from vega_datasets import data
-
+import datetime
 alt.data_transformers.disable_max_rows()
 @st.cache_data
 def readData():
@@ -71,7 +71,7 @@ def map(graph_data):
     '''
     #setup for the plot
     countries = alt.topo_feature(data.world_110m.url, 'countries')
-    graph_data = trafficking.groupby('Alpha-3 code_x').size().reset_index(name='count')
+    graph_data = graph_data.groupby('Alpha-3 code_x').size().reset_index(name='count')
     graph_data = pd.merge(graph_data, trafficking, how='right', on='Alpha-3 code_x')
     graph_data = graph_data.drop_duplicates(subset=['Numeric code_x'])
     scale_ = alt.Scale(type='band',nice=False, scheme="bluegreen")
@@ -88,11 +88,57 @@ def map(graph_data):
         tooltip=['Country_x:O', 'count:Q']
     ).properties(
         width=500,
-        height=300,
+        height=500,
         title='Denstiy Of Trafficking Destinations'
     )
 
     st.altair_chart(plot, use_container_width=True)
+    return plot
 
 map(trafficking)
+
+def types_bar(graph_data):
+    graph_data = graph_data[['Country_x','isForcedLabour','isSexualExploit','isOtherExploit']]
+    graph_data = graph_data.set_index('Country_x')
+    graph_data = graph_data.eq(1).dot(graph_data.columns + ',').str[:-1].reset_index(name='type')
+    graph_data = graph_data.groupby('type').size().reset_index(name='count')
+    graph_data = graph_data.replace('', 'Unknown')
+    bar = alt.Chart(graph_data, title='Types Of Traffickign by Citizenship').mark_bar(color='green').encode(
+        x='count',
+        y='type',
+    )
+    st.altair_chart(bar, use_container_width=True)
+    return(bar)
+types_bar(trafficking)
+
+def trafficking_over_time(graph_data):
+    graph_data = graph_data[['yearOfRegistration','isForcedLabour','isSexualExploit','isOtherExploit']]
+    graph_data = graph_data.set_index('yearOfRegistration')
+    graph_data = graph_data.eq(1).dot(graph_data.columns + ',').str[:-1].reset_index(name='type')
+    graph_data = graph_data.groupby(['yearOfRegistration','type']).size().reset_index(name='count')
+    graph_data = graph_data[graph_data['yearOfRegistration'] != 0]
+    graph_data = graph_data.replace('', 'Unknown')
+    scale_ = alt.Scale(type='band',nice=False, scheme="bluegreen")
+    highlight = alt.selection_point(on='mouseover', fields=['type'], nearest=True)
+    st.write(graph_data)
+    base = alt.Chart(graph_data).mark_line(
+        interpolate='step-after',
+        line=True
+    ).encode(
+        alt.Color('type:N', scale=scale_),
+        x='yearOfRegistration:N',
+        y='count',
+        tooltip=['type:N','count'],
+    )
+    points = base.mark_circle().encode(
+        opacity=alt.value(0)
+    ).add_params(highlight)
+
+    lines = base.mark_line().encode(
+    size=alt.condition(~highlight, alt.value(1), alt.value(3))
+    )
+    plot = points + lines
+    st.altair_chart(plot, use_container_width=True)
+    return plot
+trafficking_over_time(trafficking)
 #End of mapping 
