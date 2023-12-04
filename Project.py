@@ -1,7 +1,7 @@
 import pandas as pd 
 import altair as alt
 import streamlit as st
-from vega_datasets import data
+# from vega_datasets import data
 import datetime
 alt.data_transformers.disable_max_rows()
 @st.cache_data
