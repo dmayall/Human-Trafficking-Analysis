@@ -1,7 +1,8 @@
 import pandas as pd 
 import altair as alt
 import streamlit as st
-from vega_datasets import data
+import urllib
+import json
 import datetime
 alt.data_transformers.disable_max_rows()
 @st.cache_data
@@ -26,6 +27,9 @@ def readData():
     data['CountryOfExploitation'] = data['CountryOfExploitation'].str.strip()
 
     return data, coordinates
+
+with urllib.request.urlopen("https://cdn.jsdelivr.net/npm/vega-datasets@v1.29.0/data/world-110m.json") as url:
+        world = json.load(url)
 
 trafficking, coordinates = readData()
 st.title('Human Trafficking Analysis')
@@ -70,7 +74,7 @@ def map(graph_data):
         -returns the map
     '''
     #setup for the plot
-    countries = alt.topo_feature(data.world_110m.url, 'countries')
+    countries = alt.topo_feature('https://cdn.jsdelivr.net/npm/vega-datasets@v1.29.0/data/world-110m.json', 'countries')
     graph_data = graph_data.groupby('Alpha-3 code_x').size().reset_index(name='count')
     graph_data = pd.merge(graph_data, trafficking, how='right', on='Alpha-3 code_x')
     graph_data = graph_data.drop_duplicates(subset=['Numeric code_x'])
