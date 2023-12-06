@@ -1,7 +1,8 @@
 import pandas as pd 
 import altair as alt
 import streamlit as st
-from vega_datasets import data
+import urllib
+import json
 import datetime
 alt.data_transformers.disable_max_rows()
 @st.cache_data
@@ -27,6 +28,9 @@ def readData():
 
     return data, coordinates
 
+with urllib.request.urlopen("https://cdn.jsdelivr.net/npm/vega-datasets@v1.29.0/data/world-110m.json") as url:
+        world = json.load(url)
+
 trafficking, coordinates = readData()
 st.title('Human Trafficking Analysis')
 st.write('This Dashboard is to show the different types of trafficking and show the patterns of what people are being trafficked for in different parts of the world.')
@@ -42,8 +46,8 @@ _='''
     -Show age ranges being trafficked to look for patterns
 
     Filter ideas
-    -Filter by country of citizenship that you are interested in
-    -add an optional filter for year
+    -Filter by country of citizenship that you are interested in -Done
+    -add an optional filter for year 
     -optional filter for the types of trafficking 
     '''
 #Filters
@@ -70,7 +74,7 @@ def map(graph_data):
         -returns the map
     '''
     #setup for the plot
-    countries = alt.topo_feature(data.world_110m.url, 'countries')
+    countries = alt.topo_feature('https://cdn.jsdelivr.net/npm/vega-datasets@v1.29.0/data/world-110m.json', 'countries')
     graph_data = graph_data.groupby('Alpha-3 code_x').size().reset_index(name='count')
     graph_data = pd.merge(graph_data, trafficking, how='right', on='Alpha-3 code_x')
     graph_data = graph_data.drop_duplicates(subset=['Numeric code_x'])
