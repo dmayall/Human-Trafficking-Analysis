@@ -46,8 +46,8 @@ _='''
     -Show age ranges being trafficked to look for patterns
 
     Filter ideas
-    -Filter by country of citizenship that you are interested in
-    -add an optional filter for year
+    -Filter by country of citizenship that you are interested in -Done
+    -add an optional filter for year 
     -optional filter for the types of trafficking 
     '''
 #Filters
@@ -124,7 +124,6 @@ def trafficking_over_time(graph_data):
     graph_data = graph_data.replace('', 'Unknown')
     scale_ = alt.Scale(type='band',nice=False, scheme="bluegreen")
     highlight = alt.selection_point(on='mouseover', fields=['type'], nearest=True)
-    st.write(graph_data)
     base = alt.Chart(graph_data).mark_line(
         interpolate='step-after',
         line=True
