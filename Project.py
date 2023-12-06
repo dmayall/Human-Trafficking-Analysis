@@ -74,7 +74,7 @@ def map(graph_data):
     graph_data = graph_data.groupby('Alpha-3 code_x').size().reset_index(name='count')
     graph_data = pd.merge(graph_data, trafficking, how='right', on='Alpha-3 code_x')
     graph_data = graph_data.drop_duplicates(subset=['Numeric code_x'])
-    scale_ = alt.Scale(type='band',nice=False, scheme="bluegreen")
+    scale_ = alt.Scale(type='band',nice=False, scheme="orangered")
     #plotting
     plot = alt.Chart(countries).mark_geoshape().transform_lookup(
         lookup='id',
@@ -91,11 +91,21 @@ def map(graph_data):
         height=500,
         title='Denstiy Of Trafficking Destinations'
     )
-
     st.altair_chart(plot, use_container_width=True)
+    bar = alt.Chart(graph_data).transform_window(
+        rank='rank(count)',
+        sort=[alt.SortField('count', order='descending')]
+    ).transform_filter(
+        alt.datum.rank <= 5
+    ).mark_bar(color='maroon').encode(
+        x='count:Q',
+        y='Country_x:O',
+        
+    )
+    
+    st.altair_chart(bar, use_container_width=True)
     return plot
 
-map(trafficking)
 
 def types_bar(graph_data):
     graph_data = graph_data[['Country_x','isForcedLabour','isSexualExploit','isOtherExploit']]
@@ -103,13 +113,12 @@ def types_bar(graph_data):
     graph_data = graph_data.eq(1).dot(graph_data.columns + ',').str[:-1].reset_index(name='type')
     graph_data = graph_data.groupby('type').size().reset_index(name='count')
     graph_data = graph_data.replace('', 'Unknown')
-    bar = alt.Chart(graph_data, title='Types Of Traffickign by Citizenship').mark_bar(color='green').encode(
+    bar = alt.Chart(graph_data, title='Types Of Traffickign by Citizenship').mark_bar(color='maroon').encode(
         x='count',
         y='type',
     )
     st.altair_chart(bar, use_container_width=True)
     return(bar)
-types_bar(trafficking)
 
 def trafficking_over_time(graph_data):
     graph_data = graph_data[['yearOfRegistration','isForcedLabour','isSexualExploit','isOtherExploit']]
@@ -118,9 +127,8 @@ def trafficking_over_time(graph_data):
     graph_data = graph_data.groupby(['yearOfRegistration','type']).size().reset_index(name='count')
     graph_data = graph_data[graph_data['yearOfRegistration'] != 0]
     graph_data = graph_data.replace('', 'Unknown')
-    scale_ = alt.Scale(type='band',nice=False, scheme="bluegreen")
+    scale_ = alt.Scale(type='band',nice=False, scheme="orangered")
     highlight = alt.selection_point(on='mouseover', fields=['type'], nearest=True)
-    st.write(graph_data)
     base = alt.Chart(graph_data).mark_line(
         interpolate='step-after',
         line=True
@@ -140,5 +148,15 @@ def trafficking_over_time(graph_data):
     plot = points + lines
     st.altair_chart(plot, use_container_width=True)
     return plot
-trafficking_over_time(trafficking)
-#End of mapping 
+
+tab1, tab2, tab3 = st.tabs(['Map Density', 'Types of trafficking', 'Amount of trafficking over time'])
+
+
+with tab1:
+    map(trafficking)
+
+with tab2:
+    types_bar(trafficking)
+
+with tab3:
+    trafficking_over_time(trafficking) 
