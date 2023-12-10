@@ -157,6 +157,10 @@ tab1, tab2, tab3 = st.tabs(['Map Density', 'Types of trafficking', 'Amount of tr
 
 
 with tab1:
+    years = trafficking['yearOfRegistration'].astype(int).unique().tolist()
+    year = years.remove(0)
+    slider = st.slider('Slider for Year', min(years), max(years))
+    trafficking = trafficking[trafficking['yearOfRegistration'].isin(range(min(years), slider))]
     map(trafficking)
 
 with tab2:
