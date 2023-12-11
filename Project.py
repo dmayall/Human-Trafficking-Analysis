@@ -157,14 +157,17 @@ tab1, tab2, tab3 = st.tabs(['Map Density', 'Types of trafficking', 'Amount of tr
 
 
 with tab1:
+    st.write('This tab shows you a map of where citizens of countries are being trafficked to. Below is a slider that allowes you to set the range of years desired to see the change over time. The histogram under the map shows the top 5 countries and quantity to those countries.')
     years = trafficking['yearOfRegistration'].astype(int).unique().tolist()
     year = years.remove(0)
     slider = st.slider('Slider for Year', min(years), max(years))
-    trafficking = trafficking[trafficking['yearOfRegistration'].isin(range(min(years), slider))]
-    map(trafficking)
+    map_data = trafficking[trafficking['yearOfRegistration'].isin(range(min(years), slider))]
+    map(map_data)
 
 with tab2:
+    st.write('This tab shows the types of trafficking for the selected country or countries and counts of each.')
     types_bar(trafficking)
 
 with tab3:
+    st.write('This graph shows the amount of trafficking of each type over time for the selected country or countries.')
     trafficking_over_time(trafficking) 
