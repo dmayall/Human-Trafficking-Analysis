@@ -163,11 +163,17 @@ with tab1:
     slider = st.slider('Slider for Year', min(years), max(years))
     map_data = trafficking[trafficking['yearOfRegistration'].isin(range(min(years), slider))]
     map(map_data)
-
+    '''In the map if we select All we can see how trafficking destinations have changed over the years. If we keep moving the lsdier we see when countries are starting to get
+    introduced into the map. in 2014 we see the US pop up on the maap then grow at a high rate within the next years. We see this pattern also in Russia in earlier years.'''
 with tab2:
     st.write('This tab shows the types of trafficking for the selected country or countries and counts of each.')
     types_bar(trafficking)
-
+    '''In this bar chart we can see based on country what is the most abundunt form of trafficing. 
+    If we filter to Ukraine we see that forced labour is the msot common form of trafficking after unknown'''
 with tab3:
     st.write('This graph shows the amount of trafficking of each type over time for the selected country or countries.')
     trafficking_over_time(trafficking) 
+    '''
+    Above in the line chart we can see a great increase in all types of labor starting in 2014. I suspect this being due to an increase in actual tracking and finding victims as well as 
+    better data recording. At that same time is when we notice the US starting to become present in the destination of trafficking victims.
+    '''
