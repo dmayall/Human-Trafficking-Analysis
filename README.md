@@ -1,5 +1,7 @@
 # Human Trafficking Analysis
+### Tableau Dashboard:
 https://public.tableau.com/app/profile/derrick.mayall/viz/HumanTraffickingDestinationsAnalysis/Dashboard1
+### Streamlit Dashboard:
 [![image](https://github.com/dmayall/Human-Trafficking-Analysis/assets/108638892/140d4fca-4a91-4930-ae95-2860b7a611fd)](https://human-trafficking-analysis.streamlit.app/)
 ## Introduction
 This dashboard allowes users to view the different areas of human trafficking with a focus on wehre people are being trafficked to and what they are being trafficked for. This dashboard allowes users to change the country of citizenship to then see the coordinating countries they are being taken to. The map tab has an extra filter that allowes the user to see the change of the years. 
